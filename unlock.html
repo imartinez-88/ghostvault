@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GhostVault Unlock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(3, 80px);
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+  
+    .tile {
+      background: #111;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      line-height: 80px;
+      border-radius: 12px;
+      user-select: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+  
+    .tile.clicked {
+      background: #44cc88;
+    }
+  </style>
+  </head>
+<body> 
+  <h1>🔐 Unlock GhostVault</h1>
+  <section class="side-by-side">
+    <!-- LEFT: Pattern Input -->
+    <div class="pattern-panel">
+      <h2>Pattern Lock</h2>
+      <p>Click 4 Tiles in Sequence:</p>
+      <p id="patternDisplay"></p>
+      <div class="grid" id="patternGrid"></div>
+    </div>
+
+
+    <!-- RIGHT: Biometric Setup -->
+    <div class="biometric-panel">
+        <h2>Biometric Access</h2>
+        <p>Register your fingerprint to secure the vault</p>
+        <img src="https://symbl-cdn.com/i/webp/49/c15feec75197715e19324d301383e6.webp" alt="Fingerprint" width="100" />
+        <br />
+        <button id="registerBio">Register Biometric</button>
+        <input type="file" id="vaultFile" /><br>
+        <input type="text" id="patternInput" placeholder="Enter tile sequence e.g. 1-3-5-7" />
+        <br>
+        <button id="unlockBtn">Unlock Vault</button>
+        <button id="enterVaultBtn" style="display:none;">➡ Enter Vault Setup</button>
+        <pre id="output"></pre>
+    </div>
+
+    <script type="module">
+    import { handleUnlockClick, handleRegisterClick } from './src/UnlockVault.js';
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("unlockBtn").addEventListener("click", handleUnlockClick);
+      document.getElementById("registerBio").addEventListener("click", handleRegisterClick);
+    });
+  </script>
+
+  <script>
+    const grid = document.getElementById("patternGrid");
+    const patternDisplay = document.getElementById("patternDisplay");
+    let selectedPattern = [];
+    const patternInputField = document.getElementById("patternInput");
+
+    for (let i = 1; i <= 9; i++) {
+      const tile = document.createElement("div");
+      tile.classList.add("tile");
+      tile.textContent = i.toString();
+      tile.dataset.value = i.toString();
+      tile.onclick = () => {
+        if (!tile.classList.contains("clicked") && selectedPattern.length < 4) {
+          tile.classList.add("clicked");
+          selectedPattern.push(tile.dataset.value);
+          patternDisplay.textContent = "Pattern: " + selectedPattern.join("-");
+          patternInputField.value = selectedPattern.join("-");
+        }
+      };
+      grid.appendChild(tile);
+    }
+
+    function resetPattern() {
+        selectedPattern = [];
+        document.querySelectorAll('.tile').forEach(tile => tile.classList.remove('clicked'));
+        patternInputField.value = "";
+        patternDisplay.textContent = "";
+}
+</script>
+
+
+
+</body>
+</html>

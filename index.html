@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+   <meta charset="UTF-8" />
+   <title>GhostChain</title>
+   <style>
+     .grid {
+       display: grid;
+       grid-template-columns: repeat(3, 80px);
+       grid-template-rows: repeat(3, 80px);
+       gap: 10px;
+       justify-content: center;
+       margin: 20px 0;
+     }
+
+
+     .tile {
+       background: #111;
+       color: white;
+       font-size: 24px;
+       text-align: center;
+       line-height: 80px;
+       border-radius: 12px;
+       user-select: none;
+       cursor: pointer;
+       transition: background 0.2s;
+     }
+
+
+     .tile.clicked {
+       background: #44cc88;
+     }
+   </style>
+ </head>
+
+
+ <body>
+   <h1>GhostKey Access System</h1>
+
+
+   <!-- Key Management -->
+   <button id="createKey">Create GhostKey (Encrypted)</button>
+   <button id="walleyKey">Connect Wallet to Create GhostKey</button>
+   <button id="downloadKey">Download Key</button>
+
+
+   <h2>Recover GhostVault (Private Key)</h2>
+   <label>Vault File (.json):</label><br>
+   <input type="file" id="vaultFile"><br><br>
+   <label>Private Key File (.pem):</label><br>
+   <input type="file" id="privateKeyFile"><br><br>
+   <button id="goToVaultBtn" disabled>🔐 Proceed to Vault Access</button>
+
+
+   <pre id="output"></pre>
+   
+   <script>
+    const vaultFileInput = document.getElementById("vaultFile");
+    const privateKeyInput = document.getElementById("privateKeyFile");
+    const goBtn = document.getElementById("goToVaultBtn");
+  
+    function checkFiles() {
+      goBtn.disabled = !(vaultFileInput.files.length && privateKeyInput.files.length);
+    }
+  
+    vaultFileInput.addEventListener("change", checkFiles);
+    privateKeyInput.addEventListener("change", checkFiles);
+  
+    goBtn.onclick = () => {
+      window.location.href = "unlock.html";
+    };
+  </script>
+   <script type="module" src="./src/main.js"></script>
+   <script>
+    document.getElementById("goToVaultBtn").onclick = () => {
+      window.location.href = "unlock.html";
+    };
+   </script>
+ </body>
+</html>

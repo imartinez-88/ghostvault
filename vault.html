@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GhostVault Interface</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #00fff2;
+      font-family: 'Orbitron', sans-serif;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      border-bottom: 2px solid #222;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .vault-content {
+      background: #111;
+      padding: 20px;
+      border: 1px solid #333;
+      border-radius: 10px;
+      font-size: 1rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔓 GhostVault Open</h1>
+  <div class="vault-content" id="vaultData">
+    Loading vault...
+  </div>
+
+  <button id="uploadFileBtn">📁 Upload File</button>
+  <button id="connectWalletBtn">🔗 Connect Wallet</button>
+
+  <script>
+    const vaultRaw = sessionStorage.getItem("decryptedVault");
+    let vault = {};
+    try {
+      vault = JSON.parse(vaultRaw);
+    } catch (e) {
+      vault = { notes: vaultRaw };
+    }
+
+    const vaultArea = document.createElement("textarea");
+    vaultArea.value = vault.notes || "Type your vault notes here...";
+    document.getElementById("vaultData").innerHTML = "";
+    document.getElementById("vaultData").appendChild(vaultArea);
+
+    // File upload via right-click simulation
+    document.getElementById("uploadFileBtn").onclick = () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.onchange = async () => {
+        const file = input.files[0];
+        const arrayBuffer = await file.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        alert("File uploaded and base64 encoded:\n" + base64.slice(0, 100) + "...");
+        // Add saving to vault.contents logic later
+      };
+      input.click();
+    };
+
+    document.getElementById("connectWalletBtn").onclick = async () => {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          alert("Connected wallet: " + accounts[0]);
+        } catch (err) {
+          alert("Wallet connection failed.");
+        }
+      } else {
+        alert("MetaMask not detected.");
+      }
+    };
+  </script>
+</body>
+</html>

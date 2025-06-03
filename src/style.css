@@ -1,0 +1,102 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #0f0f0f;
+  color: #eee;
+  color-scheme: dark;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #0f0f0f;
+  font-family: monospace;
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+button {
+  padding: 10px 16px;
+  margin: 10px 10px 0 0;
+  font-size: 1em;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  background-color: #222;
+  color: #00ff99;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #00ff99;
+  color: #000;
+}
+
+pre {
+  background-color: #1a1a1a;
+  color: #00ff99;
+  padding: 1em;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 800px;
+  overflow-x: auto;
+  margin-top: 2rem;
+}
+
+.side-by-side {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1000px;
+  gap: 40px;
+  margin-top: 2rem;
+}
+
+.vault-panel,
+.pattern-panel {
+  flex: 1;
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border: 1px solid #444;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #000;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.tile {
+  background: #111;
+  color: #fff;
+  font-size: 24px;
+  text-align: center;
+  line-height: 80px;
+  border-radius: 12px;
+  user-select: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tile.clicked {
+  background: #44cc88;
+}
