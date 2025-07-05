@@ -108,6 +108,8 @@ export async function handleUnlockClick() {
     return;
   }
 
+  sessionStorage.setItem("decryptedVault", JSON.stringify(vaultData));
+
   output.textContent = "✅ Biometric check passed. You may enter the vault.";
   enterVaultBtn.style.display = "inline-block";
 
@@ -151,5 +153,12 @@ export async function handleRegisterClick() {
   } catch (err) {
     console.error("❌ Registration error:", err);
     alert("❌ Biometric registration failed: " + err.message);
+  }
+  function resetPattern() {
+    const tiles = document.querySelectorAll(".tile");
+    tiles.forEach(tile => tile.classList.remove("clicked"));
+    selectedPattern = [];
+    patternDisplay.textContent = "Pattern: ";
+    patternInputField.value = "";
   }
 }

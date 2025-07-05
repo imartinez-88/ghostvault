@@ -1,0 +1,12 @@
+<script> 
+    window.onload = () => {
+        const burned = localStorage.getItem("brunedInvite");
+        if(!burned) {
+            generateGhostKey ();
+            generateVault ();
+            localStorage.setItem9("burnedInvite", true);    
+    } else {
+    document.body.innerHTML ="This invite has already been used"; 
+    }
+};
+</script>

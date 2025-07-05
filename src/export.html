@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Export GhostVault Package</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0a0a0a;
+      color: #00fff2;
+      padding: 2rem;
+    }
+    button {
+      padding: 1rem;
+      background: #00fff2;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 Export Your GhostVault</h1>
+  <p>This creates a .ghostpkg backup containing your vault, key, and pattern hash.</p>
+  <input type="file" id="vaultFile" accept=".json"><br><br>
+  <input type="file" id="keyFile" accept=".pem"><br><br>
+  <input type="file" id="patternFile" accept=".hash"><br><br>
+  <button onclick="exportGhostPackage()">Export Vault Package</button>
+
+  <script>
+    async function exportGhostPackage() {
+      const vaultFile = document.getElementById("vaultFile").files[0];
+      const keyFile = document.getElementById("keyFile").files[0];
+      const patternFile = document.getElementById("patternFile").files[0];
+
+      if (!vaultFile || !keyFile || !patternFile) {
+        alert("All 3 files are required.");
+        return;
+      }
+
+      const readFile = file => file.text();
+
+      const [vaultData, keyData, patternData] = await Promise.all([
+        readFile(vaultFile),
+        readFile(keyFile),
+        readFile(patternFile)
+      ]);
+
+      const zip = new JSZip();
+      zip.file("vault.json", vaultData);
+      zip.file("ghostkey.pem", keyData);
+      zip.file("pattern.hash", patternData);
+
+      zip.generateAsync({ type: "blob" }).then(content => {
+        saveAs(content, "ghostvault.ghostpkg");
+      });
+    }
+  </script>
+</body>
+</html>

@@ -31,12 +31,11 @@
   </style>
 </head>
 <body>
-  <h1>🔓 GhostVault Open</h1>
-  <div class="vault-content" id="vaultData">
-    Loading vault...
-  </div>
+  <h1>GhostVault Unlock</h1>
+  <input type="checkbox" id="burnerModeToggle"> Burner Mode (Anonymous Access)
 
-  <button id="uploadFileBtn">📁 Upload File</button>
+  <div class="vault-content" id="vaultData">Loading vault...</div>
+  <button id="uploadFileBtn">📁 Upload Json.file</button>
   <button id="connectWalletBtn">🔗 Connect Wallet</button>
 
   <script>
@@ -53,19 +52,7 @@
     document.getElementById("vaultData").innerHTML = "";
     document.getElementById("vaultData").appendChild(vaultArea);
 
-    // File upload via right-click simulation
-    document.getElementById("uploadFileBtn").onclick = () => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.onchange = async () => {
-        const file = input.files[0];
-        const arrayBuffer = await file.arrayBuffer();
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        alert("File uploaded and base64 encoded:\n" + base64.slice(0, 100) + "...");
-        // Add saving to vault.contents logic later
-      };
-      input.click();
-    };
+
 
     document.getElementById("connectWalletBtn").onclick = async () => {
       if (window.ethereum) {
@@ -80,5 +67,85 @@
       }
     };
   </script>
+  
+
+<script> 
+    const now = new Date();
+    const allowedUntil = new Date(vault.allowed_until || 0);
+    if (now > allowedUntil) {
+  alert("❌ This vault has expired.");
+      return;
+    }
+</script>
+
+<script>
+    const vaultArea = document.createElement("textarea");
+    vaultArea.value = vault.notes || "Type your vault notes here...";
+    document.getElementById("vaultData").innerHTML = "";
+    document.getElementById("vaultData").appendChild(vaultArea);
+    </script>
+    <script>
+        function validateFunding(vaultFunding) {
+  const simulatedBalance = 0.2; // Replace this with mock logic
+  if (parseFloat(vaultFunding.expected_balance) > simulatedBalance) {
+    alert("⚠️ Funding check failed. Balance too low.");
+  } else {
+    alert("✅ Vault funding looks good.");
+  }
+}
+
+// Call it only if vault has funding
+if (vault.vault_funding) {
+  validateFunding(vault.vault_funding);
+}
+</script>
+
+<script>
+    async function verifyOwnership(vaultData) {
+    const burnerMode = document.getElementById("burnerModeToggle")?.checked || false;
+    if (!burnerMode) {
+      if (!window.ethereum) return alert("No wallet found.");
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const wallet = accounts[0];
+      if (vaultData.owner_wallet && vaultData.owner_wallet !== wallet) {
+        alert("🚫 This vault doesn't belong to this wallet.");
+        return false;
+      }
+    }
+    return true;
+  }
+  verifyOwnership(vault); 
+  </script>
+  <script>
+    document.getElementById("connectWalletBtn").onclick = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        alert("Connected wallet: " + accounts[0]);
+      } catch {
+        alert("Wallet connection failed.");
+      }
+    } else {
+      alert("MetaMask not detected.");
+    }
+  };
+  </script>
+
+    <script>     
+    // File upload via right-click simulation
+    document.getElementById("uploadFileBtn").onclick = () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.onchange = async () => {
+        const file = input.files[0];
+        const arrayBuffer = await file.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        alert("File uploaded and base64 encoded:\n" + base64.slice(0, 100) + "...");
+        // Add saving to vault.contents logic later
+      };
+      input.click();
+    };
+    </script>
+
 </body>
 </html>
