@@ -27,3 +27,7 @@ Full decryption output and vault UI refinement in progress.
 - Implement secure in-browser key caching
 
 > 🔒 For demonstration/educational purposes only.
+
+git add README.md
+git commit -m "Refine repository description and access notes"
+git push
