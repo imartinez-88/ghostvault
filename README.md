@@ -1,5 +1,5 @@
 # Ghostvault 🔐
-This project and all associated ideas, design, and implementation are the sole intellectual property of Isaac Martinez (imartinez-88). Not affiliated with or licensed to any employer or contractor.
+© This project and all associated ideas, design, and implementation are the sole intellectual property of Isaac Martinez (imartinez-88). Not affiliated with or licensed to any employer or contractor.
 
 GhostVault is a browser-based secure access system built with multi-layered client-side authentication. It simulates key components of a modern zero-trust vault, including biometric WebAuthn, RSA key encryption, and AES-GCM file protection.
 
