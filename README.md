@@ -1,9 +1,9 @@
 # Vault Prototype 🔐
 © This project and all associated ideas, design, and implementation are the sole intellectual property of Isaac Martinez (imartinez-88). Not affiliated with or licensed to any employer or contractor.
 
-GhostVault is a browser-based secure access system built with multi-layered client-side authentication. It simulates key components of a modern zero-trust vault, including biometric WebAuthn, RSA key encryption, and AES-GCM file protection.
+This vault skeleton is a browser-based secure access system built with multi-layered client-side authentication. It simulates key components of a modern zero-trust vault, including biometric WebAuthn, RSA key encryption, and AES-GCM file protection.
 
-## 🔧 Features
+## Features
 - Pattern-based user unlock system
 - Biometric authentication via WebAuthn
 - RSA-OAEP key pair generation (4096-bit)
@@ -11,18 +11,18 @@ GhostVault is a browser-based secure access system built with multi-layered clie
 - Vault `.json` + private key `.pem` upload
 - Fully client-side encryption & decryption flow
 
-## ⚙️ Current Status
+## Current Status
 **Phase 1.A – Pattern & Biometric Auth: ✅**  
 **Phase 1.B – Vault Decryption Skeleton: ✅**  
 Full decryption output and vault UI refinement in progress.
 
-## 🧠 Built With
+## Built With
 - JavaScript (Web Crypto API)
 - HTML/CSS UI
 - WebAuthn
 - AES-GCM & RSA-OAEP encryption
 
-## 🚀 Next Steps
+## Next Steps
 - Finalize vault decryption display
 - UI error handling & user feedback
 - Implement secure in-browser key caching
