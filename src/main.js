@@ -106,7 +106,7 @@ document.getElementById("downloadKey").onclick = () => {
 };
 
 
-// -------------------- UNLOCK PAGE (Biometric + Pattern Access) --------------------
+// UNLOCK PAGE Biometric + Pattern Access
 if (
  window.location.pathname.includes("unlock.html") ||
  window.location.pathname.includes("index.html")
