@@ -110,7 +110,7 @@ export async function handleUnlockClick() {
 
   sessionStorage.setItem("decryptedVault", JSON.stringify(vaultData));
 
-  output.textContent = "✅ Biometric check passed. You may enter the vault.";
+  output.textContent = "Biometric check passed. You may enter the vault.";
   enterVaultBtn.style.display = "inline-block";
 
   enterVaultBtn.onclick = () => {
@@ -149,7 +149,7 @@ export async function handleRegisterClick() {
     const rawId = new Uint8Array(credential.rawId);
     const base64Id = btoa(String.fromCharCode(...rawId));
     localStorage.setItem("ghostCredentialId", base64Id);
-    alert("✅ Biometric registered successfully.");
+    alert("Biometric registered successfully.");
   } catch (err) {
     console.error("❌ Registration error:", err);
     alert("❌ Biometric registration failed: " + err.message);
