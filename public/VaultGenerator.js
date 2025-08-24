@@ -14,7 +14,7 @@ export async function generateVaultFile(pattern, walletAddress = "", notes = "We
 
   const vault_enc = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
   const vault_iv = btoa(String.fromCharCode(...iv));
-  const pattern_hash = await hashPattern(pattern); // ✅ This line was missing
+  const pattern_hash = await hashPattern(pattern); // 
 
   const vaultTemplate = {
     notes: undefined, // 👈 Not used anymore, kept for structure
