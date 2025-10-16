@@ -16,8 +16,38 @@ async function generateGhostKey() {
     const publicKey = await crypto.subtle.exportKey("spki", rsaKeys.publicKey);
     const privateKey = await crypto.subtle.exportKey("pkcs8", rsaKeys.privateKey);
 
+    const aesKey = await crypto.subtle.generateKey(
+        {
+            name: "AES-GCM",
+            length: 256
+        },
+        true,
+        ["encrypt", "decrypt"]
+    );
+    const rawAES = await crypto.subtle.exportKey("raw", aesKey);
 
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const vaultMessage = new TextEncoder().encode("Welcome to GhostVault v1");
+    const encryptedVault = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv },
+        aesKey,
+        vaultMessage
+        
+    const encryptedAESKey = await crypto.subtle.encrypt(
+        { name: "RSA-OAEP" },
+        rsaKeys.publicKey,
+        rawAES
+    );
     
+    function u8ToBase64(u8) {
+        let binary = "";
+        for (let i = 0; i < u8.byteLength; i++) {
+            binary += String.fromCharCode(u8[i]);
+        }
+        return btoa(binary);
+    }
+    let walletAddress = "0xGHOSTWALLET123";
+
 
     const ghostVault = {
         ghost_signature: crypto.randomUUID(),
@@ -58,50 +88,28 @@ window.generateGhostKey = generateGhostKey;
 
 // SET UP ALL OTHER BUTTON LISTENERS AND UNLOCK LOGIC INSIDE WINDOW.ONLOAD
 window.onload = function() {
-      // Connect Wallet Button
+
+    // Connect Wallet Button
     const walleyKeyBtn = document.getElementById("walleyKey");
-
     if (walleyKeyBtn) {
-
         walleyKeyBtn.onclick = () => {
-
             alert("Simulated wallet connected: 0xGHOSTWALLET123");
-
         };
-
     }
-
-
 
     // Download Key Button
     const downloadKeyBtn = document.getElementById("downloadKey");
-
     if (downloadKeyBtn) {
-
         downloadKeyBtn.onclick = () => {
-
             const keyURL = localStorage.getItem("lastPrivateKeyBlob");
-
             if (!keyURL) {
-
                 alert("No key generated yet.");
-
                 return;
-
             }
-
             const link = document.createElement("a");
-
             link.href = keyURL;
-
             link.download = "ghostkey_private.pem";
-
             link.click();
-
         };
-
     }
-
 };
-    
-    
