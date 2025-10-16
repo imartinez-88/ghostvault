@@ -27,13 +27,13 @@ async function generateGhostKey() {
     const rawAES = await crypto.subtle.exportKey("raw", aesKey);
 
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    // NOTE: This placeholder message is what is retrieved upon successful unlock.
+    //  This placeholder message is what is retrieved upon successful unlock
     const vaultMessage = new TextEncoder().encode("Welcome to GhostVault v1");
     const encryptedVault = await crypto.subtle.encrypt(
         { name: "AES-GCM", iv },
         aesKey,
         vaultMessage
-   );  
+    ); 
 
     const encryptedAESKey = await crypto.subtle.encrypt(
         { name: "RSA-OAEP" },
