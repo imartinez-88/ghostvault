@@ -61,9 +61,24 @@
     const goBtn = document.getElementById("goToVaultBtn");
   
     function checkFiles() {
-      goBtn.disabled = !(vaultFileInput.files.length && privateKeyInput.files.length);
-    }
-  
+     const vaultFileValid = vaultFileInput.files.length && vaultFileInput.files[0].name.endsWith('.json');
+     const keyFileValid = privateKeyInput.files.length && privateKeyInput.files[0].name.endsWith('.pem');;
+
+     goBtn.disabled = !(vaultFileValid && keyFileValid);
+
+     const output = document.getElementById("output");
+     if (!goBtn.disabled) {
+       output.textContent = "✅ Files ready. Click 'Gain Vault Access'.";
+     } else if (vaultFileInput.files.length || privateKeyInput.files.length) {
+       // Only show this if files are selected but invalid
+       if ((vaultFileInput.files.length && !vaultFileValid) || (privateKeyInput.files.length && !keyFileValid)) {
+         output.textContent = "❌ Please ensure the Vault File is .json and the Private Key File is .pem.";
+       }
+     } else {
+       output.textContent = "";
+     }
+   }
+     
     vaultFileInput.addEventListener("change", checkFiles);
     privateKeyInput.addEventListener("change", checkFiles);
 
@@ -80,10 +95,9 @@
                 sessionStorage.setItem("vaultFileContent", e.target.result); // Use e.target.result
                 checkAndRedirect();
             };
-            
             vaultReader.readAsText(vaultFile);
  
-            // onload function signature to accept the event 'e' ---
+            // onload function signature to accept the event 'e' 
             keyReader.onload = (e) => {
                 // key for session storage 
                 sessionStorage.setItem("privateKeyContent", e.target.result); // Use e.target.result
@@ -101,6 +115,6 @@
             alert("Please select both the Vault File (.json) and Private Key (.pem).");
         }
     };
-</script>
+  </script>
  </body>
 </html>
