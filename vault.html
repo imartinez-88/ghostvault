@@ -99,21 +99,26 @@ if (vault.vault_funding) {
   validateFunding(vault.vault_funding);
 }
 </script>
-
-<script>
+  
+<script> // Simulated Metamask check - This protoype simulates check wtih (connected wallet) 
     async function verifyOwnership(vaultData) {
-    const burnerMode = document.getElementById("burnerModeToggle")?.checked || false;
+      const burnerMode = document.getElementById("burnerModeToggle")?.checked || false;
     if (!burnerMode) {
-      if (!window.ethereum) return alert("No wallet found.");
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const wallet = accounts[0];
-      if (vaultData.owner_wallet && vaultData.owner_wallet !== wallet) {
-        alert("🚫 This vault doesn't belong to this wallet.");
-        return false;
+      return true;
+    } 
+    const connectedWallet = prompt("Simulate Connected Wallet Address (Leave blank to fail): " ); 
+    if (!connectWallet) {
+        alert(" No Wallet connected for onwership verification. Default to Bruner Mode");
+        return true; // allowed access, with warning
       }
-    }
-    return true;
+  const expectedOwner = vaultData.owner_wallet || "0DefaultOnwerWalletIfMissing"; 
+    
+    if expectedOwner.toLowerCase() !=connectedWallet || toLowerCase()) {
+      alert('Access Denied. Connected wallet (${connectedWallet.slice(0,10)}....) does not match expcted owner (${expectedOnwer.slice(0,10}....).');
+    return false;
   }
+
+      
   verifyOwnership(vault); 
   </script>
   <script>
