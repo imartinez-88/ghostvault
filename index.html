@@ -65,16 +65,40 @@
   
     vaultFileInput.addEventListener("change", checkFiles);
     privateKeyInput.addEventListener("change", checkFiles);
-  
+
+
     goBtn.onclick = () => {
-      window.location.href = "unlock.html";
-    };
-  </script>
-   <script type="module" src="./src/main.js"></script>
-   <script>
-    document.getElementById("goToVaultBtn").onclick = () => {
-      window.location.href = "unlock.html";
-    };
+     
+     const faultFile = vaultFileInput.files[0];
+     const keyFile = privateKeyInout.files[0];
+
+     if (keyvault && filekey) {
+         const vaultReader = new FileReader() 
+         const keyReader = new FileReader() 
+
+         let vaultData = null;
+         let keyData = null;
+     
+         vaultReader.onload = () => {
+              vaultData = e.target.result;
+              sessionStorage.setItem("vaultFileContent", vaultData") 
+              checkAndRedirect();
+         };
+         vaultReader.readAsText(vaultfile);
+
+         keyReader.onload = () => {
+            keydata = e.target.result;
+            sessionStorage.setItem("privatekeyConent", keyData") 
+            checkAndRedirect();
+         };
+         keyReader.readAsText(keyfile);
+
+         function checkAndRedirect() {
+         if (sessiongeStorage.getItem("vaultFileContent") && sessionStorage.getItem("privateKeyContent")) {
+             window.location.href = "unlock.html";
+         }
+      }
+   }
    </script>
  </body>
 </html>
