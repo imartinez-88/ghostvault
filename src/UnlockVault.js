@@ -3,55 +3,93 @@ let failedAttempts = 0;
 const MAX_ATTEMPTS = 3;
 const LOCKOUT_DURATION = 5 * 60 * 1000;
 let firstAttemptTime = null;
-const unlockSalt = "ghostvault_salt_value";
 
-function hashPatternWithSalt(pattern, salt) {
-  const combined = pattern + salt;
-  const encoder = new TextEncoder();
-  return crypto.subtle.digest("SHA-512", encoder.encode(combined));
-}
+async function tryUnlockVault(patternInput, vaultData) {
+    // Lockout logic (Optional: you can move this back into the handler)
+    const now = Date.now();
+    if (!firstAttemptTime) firstAttemptTime = now;
+    if (now - firstAttemptTime > LOCKOUT_DURATION) {
+        failedAttempts = 0;
+        firstAttemptTime = now;
+    }
+    if (failedAttempts >= MAX_ATTEMPTS) {
+        document.getElementById("output").textContent = "💥 Vault burned: too many failed attempts.";
+        return false;
+    }
+  
+const privateKeyText = sessionStorage.getItem("privateKeyContent");
+const vaultEncBase64 = vaultData.aes_key_enc; // Encrypted AES Key (RSA)
+const ivBase64 = vaultData.vault_iv;
+const encryptedVaultBase64 = vaultData.vault_enc;
 
-async function createAESKeyFromPattern(pattern) {
-  const rawHash = await hashPatternWithSalt(pattern, unlockSalt);
-  const fullHash = new Uint8Array(rawHash);
-  const aesKeyBytes = fullHash.slice(0, 32);  
-  return crypto.subtle.importKey(
-    "raw",
-    aesKeyBytes,
-    { name: "AES-GCM" },
-    false,
-    ["decrypt"]
-  );
-}
+let privateKey;
+    try {
+        const pemHeader = "-----BEGIN PRIVATE KEY-----";
+        const pemFooter = "-----END PRIVATE KEY-----";
+        const base64Key = privateKeyText
+            .replace(pemHeader, '')
+            .replace(pemFooter, '')
+            .replace(/\s/g, '');
+        const pkcs8 = Uint8Array.from(atob(base64Key), c => c.charCodeAt(0));
 
-async function tryUnlockVault(patternInput, vaultEnc, iv, vaultData) {
-  const now = Date.now();
-
-  if (!firstAttemptTime) firstAttemptTime = now;
-  if (now - firstAttemptTime > LOCKOUT_DURATION) {
-    failedAttempts = 0;
-    firstAttemptTime = now;
-  }
-
-  if (failedAttempts >= MAX_ATTEMPTS) {
-    document.getElementById("output").textContent = "💥 Vault burned: too many failed attempts.";
-    return false;
-  }
-
-const aesKey = await createAESKeyFromPattern(patternInput);
+        privateKey = await crypto.subtle.importKey(
+            "pkcs8",
+            pkcs8,
+            { name: "RSA-OAEP", hash: "SHA-256" },
+            false,
+            ["decrypt"]
+        );
+    } catch (e) {
+        document.getElementById("output").textContent = "❌ Error: Invalid or corrupt Private Key File (.pem).";
+        console.error("Private Key Import Error:", e);
+        return false;
+    }
+  
   try {
-    const decrypted = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: Uint8Array.from(atob(iv), c => c.charCodeAt(0)) },
-      aesKey,
-      Uint8Array.from(atob(vaultEnc), c => c.charCodeAt(0))
-    );
- const message = new TextDecoder().decode(decrypted);
-    sessionStorage.setItem("decryptedVault", message);
-    return true;
+        const encryptedAESKey = Uint8Array.from(atob(vaultEncBase64), c => c.charCodeAt(0));
+        
+        // 1. Decrypt the raw AES key using the RSA Private Key
+        const decryptedAESKey = await crypto.subtle.decrypt(
+            { name: "RSA-OAEP" },
+            privateKey,
+            encryptedAESKey
+        );
+        
+        // 2. Import the decrypted raw AES key
+        const aesKey = await crypto.subtle.importKey(
+            "raw",
+            decryptedAESKey,
+            { name: "AES-GCM" },
+            false,
+            ["decrypt"]
+        );
+        const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+        const encryptedVault = Uint8Array.from(atob(encryptedVaultBase64), c => c.charCodeAt(0));
+
+        const decryptedVault = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv },
+            aesKey,
+            encryptedVault
+        );
+        
+        // Success: Store decrypted message
+        const message = new TextDecoder().decode(decryptedVault);
+        sessionStorage.setItem("decryptedVault", message);
+        
+        // 4. Pattern Lock Check (Used as a second factor now)
+        if (patternInput !== "2-5-8-7") { 
+            failedAttempts++;
+            return false;
+        }
+
+        return true;
+     
   } catch (err) {
-    failedAttempts++;
-    return false;
-  }
+        failedAttempts++;
+        document.getElementById("output").textContent = "❌ Decryption Failed. Key/Vault mismatch.";
+        console.error("Decryption Error:", err);
+        return false;
+    }
 }
 
 async function performBiometricGate() {
@@ -88,8 +126,7 @@ export async function handleUnlockClick() {
   const enterVaultBtn = document.getElementById("enterVaultBtn");
 
  const vaultText = sessionStorage.getItem("vaultFileContent")
-  
-if (!vaultText) {
+ if (!vaultText) {
     output.textContent = " Vault data not loaded from session. Return to home page.";
     return;
 }
@@ -105,18 +142,14 @@ let vaultData;
 const unlockedSuccessfully = await tryUnlockVault(patternInput, vaultData.vault_enc, vaultData.vault_iv, vaultData);
   
   if (!unlockedSuccessfully) {
-    if (failedAttempts >= MAX_ATTEMPTS) {
-      output.textContent = "Vault burned: too many failed attempts.";
-    } else {
-      output.textContent = `Pattern incorrect. Attempts remaining: ${MAX_ATTEMPTS - failedAttempts}`;
-    }
-    return;
-  }
-const biometricPassed = await performBiometricGate();
-  if (!biometricPassed) {
-    output.textContent = "Pattern Correct, but Biometric Authentication Failed.";
-    return;
-  }
+        output.textContent = `❌ Decryption/Pattern Failed. Attempts remaining: ${MAX_ATTEMPTS - failedAttempts}`;
+        return;
+    }
+// const biometricPassed = await performBiometricGate();
+  // if (!biometricPassed) {
+    //output.textContent = "Pattern Correct, but Biometric Authentication Failed.";
+    //return;
+  //}
 
 const decryptedMessage = sessionStorage.getItem("decryptedVault"); 
   if (decryptedMessage) {
