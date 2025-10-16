@@ -73,7 +73,7 @@
     const now = new Date();
     const allowedUntil = new Date(vault.allowed_until || 0);
     if (now > allowedUntil) {
-  alert("❌ This vault has expired.");
+  alert(" This vault has expired.");
       return;
     }
 </script>
@@ -88,9 +88,9 @@
         function validateFunding(vaultFunding) {
   const simulatedBalance = 0.2; // Replace this with mock logic
   if (parseFloat(vaultFunding.expected_balance) > simulatedBalance) {
-    alert("⚠️ Funding check failed. Balance too low.");
+    alert("Funding check failed. Balance too low.");
   } else {
-    alert("✅ Vault funding looks good.");
+    alert(" Vault funding looks good.");
   }
 }
 
