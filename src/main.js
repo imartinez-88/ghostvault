@@ -60,15 +60,6 @@ async function generateGhostKey() {
         rawAES
     );
     
-    function u8ToBase64(u8) {
-        let binary = "";
-        const bytes = new Uint8Array(u8);
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return btoa(binary);
-    }
-    
     let walletAddress = "0xGHOSTWALLET123";
 
 
