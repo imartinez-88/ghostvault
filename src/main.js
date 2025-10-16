@@ -1,5 +1,24 @@
 // main.js
+function bufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    // We wrap the exported PKCS#8 key with PEM headers/footers for correct .pem file structure
+    const base64Content = btoa(binary);
+    return `-----BEGIN PRIVATE KEY-----\n${base64Content.match(/.{1,64}/g).join('\n')}\n-----END PRIVATE KEY-----`;
+}
 
+// Existing helper function for going the other direction (U8 Array to Base64)
+function u8ToBase64(u8) {
+    let binary = "";
+    const bytes = new Uint8Array(u8);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
 // issue fix  for  HTML button that couldn't call the function.
 async function generateGhostKey() {
     const rsaKeys = await crypto.subtle.generateKey(
@@ -85,8 +104,6 @@ async function generateGhostKey() {
     URL.revokeObjectURL(keyURL);
 
     localStorage.setItem("lastPrivateKeyBlob", keyURL);
-
-    localStorage.setItem("lastPrivateKeyBlob", keyURL);
     document.getElementById("output").textContent = "GhostVault and Private Key downloaded successfully.";
     alert("GhostVault and Private Key downloaded.");
 }
@@ -104,32 +121,40 @@ window.onload = function() {
             alert("Simulated wallet connected: 0xGHOSTWALLET123");
         };
     }
-
     // Download Key Button
     const downloadKeyBtn = document.getElementById("downloadKey");
     if (downloadKeyBtn) {
-    downloadKeyBtn.onclick = () => {
-        const keyURL = localStorage.getItem("lastPrivateKeyBlob");
-        const vaultURL = localStorage.getItem("lastGhostVaultBlob"); // ✅ GET VAULT URL
+        downloadKeyBtn.onclick = () => {
+            const keyContent = localStorage.getItem("lastPrivateKeyContent");
+            const vaultContent = localStorage.getItem("lastGhostVaultContent"); // ✅ FIX 3: Get JSON content
 
-        if (!keyURL || !vaultURL) { // ✅ CHECK BOTH URLS
-            alert("No key or vault has been generated yet. Please click 'Create GhostKey' first.");
-            return;
-        }
+            if (!keyContent || !vaultContent) { // ✅ Check if both are available
+                alert("No key or vault has been generated yet. Please click 'Create GhostKey' first.");
+                return;
+            }
+            // 1. Re-download PEM Key
+            let keyBlob = new Blob([keyContent], { type: "application/x-pem-file" });
+            let keyURL = URL.createObjectURL(keyBlob);
+            let link = document.createElement("a");
+            link.href = keyURL;
+            link.download = "ghostkey_private.pem";
+            link.click();
+            URL.revokeObjectURL(keyURL); // Clean up temporary URL
+            
+            // 2. Re-download JSON Vault ✅
+            let vaultBlob = new Blob([vaultContent], { type: "application/json" });
+            let vaultURL = URL.createObjectURL(vaultBlob);
+            link = document.createElement("a");
+            link.href = vaultURL;
+            link.download = "ghostvault_custom.json";
+            link.click();
+            URL.revokeObjectURL(vaultURL); // Clean up temporary URL
 
-        // 1. Download PEM Key
-        let link = document.createElement("a");
-        link.href = keyURL;
-        link.download = "ghostkey_private.pem";
-        link.click();
-
-        // 2. Download JSON Vault ✅ 
-        link = document.createElement("a");
-        link.href = vaultURL;
-        link.download = "ghostvault_custom.json";
-        link.click();
-
-        document.getElementById("output").textContent = "GhostVault (.json) and Private Key (.pem) re-downloaded.";
-    };
-  }
+            document.getElementById("output").textContent = "GhostVault (.json) and Private Key (.pem) re-downloaded successfully.";
+        };
+    }
+    
+    // Check files on load logic from Index.html
+    const vaultFileInput = document.getElementById("vaultFile");
+    const privateKeyInput = document.getElementById("privateKeyFile");
 };
