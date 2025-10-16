@@ -4,7 +4,7 @@
         if(!burned) {
             generateGhostKey ();
             generateVault ();
-            localStorage.setItem9("burnedInvite", true); // <-- Typo here: setItem9 instead of setItem
+           localStorage.setItem9("burnedInvite", true); // <-- CRITICAL TYPO: setItem9
         } else {
             document.body.innerHTML ="This invite has already been used"; 
         }
