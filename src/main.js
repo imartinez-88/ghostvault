@@ -33,7 +33,7 @@ async function generateGhostKey() {
         { name: "AES-GCM", iv },
         aesKey,
         vaultMessage
-   };  
+   );  
 
     const encryptedAESKey = await crypto.subtle.encrypt(
         { name: "RSA-OAEP" },
