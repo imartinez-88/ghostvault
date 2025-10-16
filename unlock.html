@@ -59,19 +59,13 @@
     </div>
 
     <script type="module">
-    import { handleUnlockClick, handleRegisterClick } from './src/UnlockVault.js';
+      import { handleUnlockClick, handleRegisterClick } from './src/UnlockVault.js';
 
     window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("unlockBtn").addEventListener("click", handleUnlockClick);
       document.getElementById("registerBio").addEventListener("click", handleRegisterClick);
-      document.getElementById("resetTilesBtn").addEventListener("click", resetPattern);
     });
 
-      function resetPattern() {
-        let selectedProgram = []; 
-        document.querySelectorAll('.title').forEach(title => (title.classList.remove('clicked'));
-        doucment.getElementById("patternInput").value = " ";
-      }
   </script>
 
   <script>
@@ -80,30 +74,26 @@
     const patternInputField = document.getElementById("patternInput");
 
     for (let i = 1; i <= 9; i++) {
-      const tile = document.createElement("div");
-      tile.classList.add("tile");
-      tile.textContent = i.toString();
-      tile.dataset.value = i.toString();
-      tile.onclick = () => {
-        if (!tile.classList.contains("clicked") && selectedPattern.length < 4) {
-          tile.classList.add("clicked");
-          selectedPattern.push(tile.dataset.value);
-          patternInputField.value = selectedPattern.join("-");
-        }
-      };
-      grid.appendChild(tile);
-    }
-
-  function resetPattern() {
-        selectedPattern = [];
-        document.querySelectorAll('.tile').forEach(tile => tile.classList.remove('clicked'));
-        patternInputField.value = "";
-    
-  document.getElementById("resetTilesBtn").onclick = resetPattern;
-}
-</script>
-
-
-
+             const tile = document.createElement("div");
+             tile.classList.add("tile");
+             tile.textContent = i.toString();
+             tile.dataset.value = i.toString();
+             tile.onclick = () => {
+                 if (!tile.classList.contains("clicked") && selectedPattern.length < 4) {
+                     tile.classList.add("clicked");
+                     selectedPattern.push(tile.dataset.value);
+                     patternInputField.value = selectedPattern.join("-");
+                 }
+             };
+             grid.appendChild(tile);
+         }
+    function resetPattern() {
+             selectedPattern = [];
+             document.querySelectorAll('.tile').forEach(tile => tile.classList.remove('clicked'));
+             patternInputField.value = "";
+         }
+         
+         document.getElementById("resetTilesBtn").onclick = resetPattern;
+     </script>
 </body>
 </html>
