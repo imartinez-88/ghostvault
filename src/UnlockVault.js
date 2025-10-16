@@ -38,14 +38,14 @@ async function tryUnlockVault(patternInput, vaultEnc, iv, vaultData) {
     return false;
   }
 
-  const aesKey = await createAESKeyFromPattern(patternInput);
+const aesKey = await createAESKeyFromPattern(patternInput);
   try {
     const decrypted = await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: Uint8Array.from(atob(iv), c => c.charCodeAt(0)) },
       aesKey,
       Uint8Array.from(atob(vaultEnc), c => c.charCodeAt(0))
     );
-    const message = new TextDecoder().decode(decrypted);
+ const message = new TextDecoder().decode(decrypted);
     sessionStorage.setItem("decryptedVault", message);
     return true;
   } catch (err) {
@@ -84,48 +84,51 @@ async function performBiometricGate() {
 
 export async function handleUnlockClick() {
   const patternInput = document.getElementById("patternInput").value;
-  const vaultFile = document.getElementById("vaultFile").files[0];
-  const output = document.getElementById("output");
-  const enterVaultBtn = document.getElementById("enterVaultBtn");
+  const output = document.getElementById("output");
+  const enterVaultBtn = document.getElementById("enterVaultBtn");
 
-  const vaultText = sessionStorage.getItem("vaultFileContent");
-  const privateKeyText = sessionStorage.getItem("privateKeyConent"); 
+ const vaultText = sessionStorage.getItem("vaultFileContent")
   
-  if (!vaultFile) {
-    output.textContent = "Vault File Not Found In Session";
-    return;
-  }
-
-
-
-  let vualtData; 
-  try { 
-    vaultData = JSON.parse(vaulText); 
-  } catch (e)  { 
-    output.textContent = "Failed To Parse Vault File Session" ;  
-    return;
-  } 
+if (!vaultText) {
+    output.textContent = " Vault data not loaded from session. Return to home page.";
+    return;
+}
   
-  const patternPassed = await tryUnlockVault(patternInput, vaultData.vault_enc, vaultData.vault_iv, vaultData);
-  if (!patternPassed) {
-    output.textContent = `Pattern incorrect, ${MAX_ATTEMPTS - failedAttempts}`;;
-    return;
-  }
+let vaultData;
+  try {
+    vaultData = JSON.parse(vaultText);
+  } catch (e) {
+    output.textContent = " Failed to parse vault data. File corrupted.";
+    return;
+  }
 
-  const biometricPassed = await performBiometricGate();
-  if (!biometricPassed) {
-    output.textContent = "Pattern Correct, but Biometric Authentication Failed.";
-    return;
-  }
+const unlockedSuccessfully = await tryUnlockVault(patternInput, vaultData.vault_enc, vaultData.vault_iv, vaultData);
+  
+  if (!unlockedSuccessfully) {
+    if (failedAttempts >= MAX_ATTEMPTS) {
+      output.textContent = "Vault burned: too many failed attempts.";
+    } else {
+      output.textContent = `Pattern incorrect. Attempts remaining: ${MAX_ATTEMPTS - failedAttempts}`;
+    }
+    return;
+  }
+const biometricPassed = await performBiometricGate();
+  if (!biometricPassed) {
+    output.textContent = "Pattern Correct, but Biometric Authentication Failed.";
+    return;
+  }
 
-  sessionStorage.setItem("decryptedVault", JSON.stringify(vaultData));
-
-  output.textContent = "Two-Factor Access Granted. Click 'Enter Vault Setup' to continue.";
+const decryptedMessage = sessionStorage.getItem("decryptedVault"); 
+  if (decryptedMessage) {
+    output.textContent = " Two-Factor Access Granted. Decrypted Vault Message: \n\n" + decryptedMessage;
+  } else {
+    output.textContent = "Two-Factor Access Granted. Click 'Enter Vault Setup' to continue.";
+  }
   enterVaultBtn.style.display = "inline-block";
 
-  enterVaultBtn.onclick = () => {
-    window.location.href = "vault.html";
-  };
+  enterVaultBtn.onclick = () => {
+    window.location.href = "vault.html";
+  };
 }
 
 export async function handleRegisterClick() {
@@ -161,14 +164,7 @@ export async function handleRegisterClick() {
     localStorage.setItem("ghostCredentialId", base64Id);
     alert("Biometric registered successfully.");
   } catch (err) {
-    console.error("❌ Registration error:", err);
-    alert("❌ Biometric registration failed: " + err.message);
-  }
-  function resetPattern() {
-    const tiles = document.querySelectorAll(".tile");
-    tiles.forEach(tile => tile.classList.remove("clicked"));
-    selectedPattern = [];
-    patternDisplay.textContent = "Pattern: ";
-    patternInputField.value = "";
+    console.error("Registration error:", err);
+    alert("Biometric registration failed: " + err.message);
   }
 }
