@@ -17,7 +17,7 @@ export async function generateVaultFile(pattern, walletAddress = "", notes = "We
   const pattern_hash = await hashPattern(pattern); // 
 
   const vaultTemplate = {
-    notes: undefined, // 👈 Not used anymore, kept for structure
+    notes: undefined, // Not used anymore, kept for structure
     owner_wallet: walletAddress,
     pattern_hash: pattern_hash,
     vault_enc: vault_enc,
