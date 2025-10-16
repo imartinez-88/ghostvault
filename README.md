@@ -3,7 +3,7 @@
 
 © This project and all associated ideas, design, and implementation are the sole intellectual property of Isaac Martinez (imartinez-88). Not affiliated with or licensed to any employer or contractor.
 
-This vault skeleton is a **browser-based secure access system** built with multi-layered client-side authentication, designed to demonstrate secure data handling for environments requiring high assurance (e.g., CUI/FedRAMP compliance).
+This vault skeleton is a **browser-based secure access system** built with multi-layered client-side authentication, designed to demonstrate secure data handling for environments enabling high assurance for scaling dApp platfroms.
 
 It simulates key components of a modern **zero-trust vault**, implementing cryptographic controls client-side to ensure the server never handles unencrypted data.
 
