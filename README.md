@@ -31,7 +31,7 @@ It simulates key components of a modern **zero-trust vault**, implementing crypt
 | **Phase 1.A** | Pattern & Biometric Registration and Access Flow | ** Complete** |
 | **Phase 1.B** | Vault File Generation & Core AES Decryption Logic | ** Complete (Skeleton)** |
 | **Phase 2** | **Foreign PKCS#12 Integration** with X.509 Certificate Signature (High-Assurance) | **In Progress** |
-| **Phase 3** | Secure In-Browser Key Caching/Session Management | **💡 Planned** |
+| **Phase 3** | Secure In-Browser Key Caching/Session Management | **Planned** |
 
 ---
 ### Next Steps
