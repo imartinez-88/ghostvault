@@ -74,6 +74,8 @@ async function generateGhostKey() {
     vaultLink.click();
     URL.revokeObjectURL(vaultURL);
 
+    localStorage.setItem("lastGhostVaultBlob", vaultURL);
+
     const keyBlob = new Blob([privateKey], { type: "application/octet-stream" });
     const keyURL = URL.createObjectURL(keyBlob);
     const keyLink = document.createElement("a");
@@ -81,6 +83,8 @@ async function generateGhostKey() {
     keyLink.download = "ghostkey_private.pem";
     keyLink.click();
     URL.revokeObjectURL(keyURL);
+
+    localStorage.setItem("lastPrivateKeyBlob", keyURL);
 
     localStorage.setItem("lastPrivateKeyBlob", keyURL);
     document.getElementById("output").textContent = "GhostVault and Private Key downloaded successfully.";
@@ -104,16 +108,28 @@ window.onload = function() {
     // Download Key Button
     const downloadKeyBtn = document.getElementById("downloadKey");
     if (downloadKeyBtn) {
-        downloadKeyBtn.onclick = () => {
-            const keyURL = localStorage.getItem("lastPrivateKeyBlob");
-            if (!keyURL) {
-                alert("No key generated yet.");
-                return;
-            }
-            const link = document.createElement("a");
-            link.href = keyURL;
-            link.download = "ghostkey_private.pem";
-            link.click();
-        };
-    }
+    downloadKeyBtn.onclick = () => {
+        const keyURL = localStorage.getItem("lastPrivateKeyBlob");
+        const vaultURL = localStorage.getItem("lastGhostVaultBlob"); // ✅ GET VAULT URL
+
+        if (!keyURL || !vaultURL) { // ✅ CHECK BOTH URLS
+            alert("No key or vault has been generated yet. Please click 'Create GhostKey' first.");
+            return;
+        }
+
+        // 1. Download PEM Key
+        let link = document.createElement("a");
+        link.href = keyURL;
+        link.download = "ghostkey_private.pem";
+        link.click();
+
+        // 2. Download JSON Vault ✅ 
+        link = document.createElement("a");
+        link.href = vaultURL;
+        link.download = "ghostvault_custom.json";
+        link.click();
+
+        document.getElementById("output").textContent = "GhostVault (.json) and Private Key (.pem) re-downloaded.";
+    };
+  }
 };
