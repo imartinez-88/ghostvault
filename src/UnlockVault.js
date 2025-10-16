@@ -88,29 +88,39 @@ export async function handleUnlockClick() {
   const output = document.getElementById("output");
   const enterVaultBtn = document.getElementById("enterVaultBtn");
 
+  const vaultText = sessionStorage.getItem("vaultFileContent");
+  const privateKeyText = sessionStorage.getItem("privateKeyConent"); 
+  
   if (!vaultFile) {
-    output.textContent = "Please upload your GhostVault file.";
+    output.textContent = "Vault File Not Found In Session";
     return;
   }
 
-  const vaultText = await vaultFile.text();
-  const vaultData = JSON.parse(vaultText);
 
+
+  let vualtData; 
+  try { 
+    vaultData = JSON.parse(vaulText); 
+  } catch (e)  { 
+    output.textContent = "Failed To Parse Vault File Session" ;  
+    return;
+  } 
+  
   const patternPassed = await tryUnlockVault(patternInput, vaultData.vault_enc, vaultData.vault_iv, vaultData);
   if (!patternPassed) {
-    output.textContent = "❌ Pattern incorrect.";
+    output.textContent = `Pattern incorrect, ${MAX_ATTEMPTS - failedAttempts}`;;
     return;
   }
 
   const biometricPassed = await performBiometricGate();
   if (!biometricPassed) {
-    output.textContent = "❌ Biometric failed.";
+    output.textContent = "Pattern Correct, but Biometric Authentication Failed.";
     return;
   }
 
   sessionStorage.setItem("decryptedVault", JSON.stringify(vaultData));
 
-  output.textContent = "Biometric check passed. You may enter the vault.";
+  output.textContent = "Two-Factor Access Granted. Click 'Enter Vault Setup' to continue.";
   enterVaultBtn.style.display = "inline-block";
 
   enterVaultBtn.onclick = () => {
