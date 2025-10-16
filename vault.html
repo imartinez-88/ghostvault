@@ -39,13 +39,15 @@
   <button id="connectWalletBtn">🔗 Connect Wallet</button>
 
   <script>
-    const vaultRaw = sessionStorage.getItem("decryptedVault");
+    const vaultNotesRaw = sessionStorage.getItem("decryptedVault");
+    const vaultMetadataRaw = sessionStorage.getItem("vaultMetadata"); 
+    let vaultNotes =  vaultNotesRaw || "Vault Content Not Found"; 
     let vault = {};
     try {
-      vault = JSON.parse(vaultRaw);
+      vault = JSON.parse(vaultMetadataRaw); // Use of metadata checks
     } catch (e) {
-      vault = { notes: vaultRaw };
-    }
+      vault = {}; // Fallback if metadata is missing/corrupted
+}
 
     const vaultArea = document.createElement("textarea");
     vaultArea.value = vault.notes || "Type your vault notes here...";
