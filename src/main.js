@@ -27,12 +27,14 @@ async function generateGhostKey() {
     const rawAES = await crypto.subtle.exportKey("raw", aesKey);
 
     const iv = crypto.getRandomValues(new Uint8Array(12));
+    // NOTE: This placeholder message is what is retrieved upon successful unlock.
     const vaultMessage = new TextEncoder().encode("Welcome to GhostVault v1");
     const encryptedVault = await crypto.subtle.encrypt(
         { name: "AES-GCM", iv },
         aesKey,
         vaultMessage
-        
+   };  
+
     const encryptedAESKey = await crypto.subtle.encrypt(
         { name: "RSA-OAEP" },
         rsaKeys.publicKey,
@@ -41,11 +43,13 @@ async function generateGhostKey() {
     
     function u8ToBase64(u8) {
         let binary = "";
-        for (let i = 0; i < u8.byteLength; i++) {
-            binary += String.fromCharCode(u8[i]);
+        const bytes = new Uint8Array(u8);
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
         }
         return btoa(binary);
     }
+    
     let walletAddress = "0xGHOSTWALLET123";
 
 
