@@ -68,11 +68,11 @@
 
      const output = document.getElementById("output");
      if (!goBtn.disabled) {
-       output.textContent = "✅ Files ready. Click 'Gain Vault Access'.";
+       output.textContent = " Files ready. Click 'Gain Vault Access'.";
      } else if (vaultFileInput.files.length || privateKeyInput.files.length) {
        // Only show this if files are selected but invalid
        if ((vaultFileInput.files.length && !vaultFileValid) || (privateKeyInput.files.length && !keyFileValid)) {
-         output.textContent = "❌ Please ensure the Vault File is .json and the Private Key File is .pem.";
+         output.textContent = " Please ensure the Vault File is .json and the Private Key File is .pem.";
        }
      } else {
        output.textContent = "";
