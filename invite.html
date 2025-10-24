@@ -1,10 +1,10 @@
 <script>  // Invite.html
     window.onload = () => {
-        const burned = localStorage.getItem("brunedInvite");
+        const burned = localStorage.getItem("burnedInvite");
         if(!burned) {
             generateGhostKey ();
             generateVault ();
-           localStorage.setItem9("burnedInvite", true); // <-- CRITICAL TYPO: setItem9
+           localStorage.setItem("burnedInvite", true); // <-- CRITICAL TYPO: setItem9
         } else {
             document.body.innerHTML ="This invite has already been used"; 
         }
