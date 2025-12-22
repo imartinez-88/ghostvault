@@ -47,11 +47,11 @@ let privateKey;
         const encryptedAESKey = Uint8Array.from(atob(vaultEncBase64), c => c.charCodeAt(0));
         
         // 1. Decrypt the raw AES key using the RSA Private Key
-        const decryptedAESKey = await crypto.subtle.decrypt(
-            { name: "RSA-OAEP" },
-            privateKey,
-            encryptedAESKey
-        );
+      //  const decryptedAESKey = await crypto.subtle.decrypt(
+    //        { name: "RSA-OAEP" },
+    //        privateKey,
+   //         encryptedAESKey
+  //      );
         
         // 2. Import the decrypted raw AES key
         const aesKey = await crypto.subtle.importKey(
@@ -84,7 +84,7 @@ let privateKey;
      
   } catch (err) {
         failedAttempts++;
-        document.getElementById("output").textContent = "❌ Decryption Failed. Key/Vault mismatch.";
+        document.getElementById("output").textContent = " Decryption Failed. Key/Vault mismatch.";
         console.error("Decryption Error:", err);
         return false;
     }
