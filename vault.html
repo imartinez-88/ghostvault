@@ -69,53 +69,8 @@
     document.getElementById("vaultData").innerHTML = "";
     document.getElementById("vaultData").appendChild(vaultArea);
     </script>
-    <script>
-        function validateFunding(vaultFunding) {
-  const simulatedBalance = 0.2; // Replace this with mock logic
-  if (parseFloat(vaultFunding.expected_balance) > simulatedBalance) {
-    alert("Funding check failed. Balance too low.");
-  } else {
-    alert(" Vault funding looks good.");
-  }
-}
 
-// Call it only if vault has funding
-if (vault.vault_funding) {
-  validateFunding(vault.vault_funding);
-}
-</script>
-  
-<script> // Simulated Metamask check - This protoype simulates check wtih (connected wallet) 
-    async function verifyOwnership(vaultData) {
-      const burnerMode = document.getElementById("burnerModeToggle")?.checked || false;
-    if (!burnerMode) {
-      return true;
-    } 
-    const connectedWallet = prompt("Simulate Connected Wallet Address (Leave blank to fail): " ); 
-    if (!connectWallet) {
-        alert(" No Wallet connected for onwership verification. Default to Bruner Mode");
-        return true; // allowed access, with warning
-      }
-  }
-      
-  verifyOwnership(vault); 
-  </script>
-  <script>
-    document.getElementById("connectWalletBtn").onclick = async () => {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        alert("Connected wallet: " + accounts[0]);
-      } catch {
-        alert("Wallet connection failed.");
-      }
-    } else {
-      alert("MetaMask not detected.");
-    }
-  };
-  </script>
-
-    <script>     
+<script>     
     // File upload via right-click simulation
     document.getElementById("uploadFileBtn").onclick = () => {
       const input = document.createElement("input");
