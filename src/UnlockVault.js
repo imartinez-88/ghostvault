@@ -1,11 +1,9 @@
-// UnlockVault.js
 let failedAttempts = 0;
 const MAX_ATTEMPTS = 3;
 const LOCKOUT_DURATION = 5 * 60 * 1000;
 let firstAttemptTime = null;
 
 async function tryUnlockVault(patternInput, vaultData) {
-    // Lockout logic (Optional: you can move this back into the handler)
     const now = Date.now();
     if (!firstAttemptTime) firstAttemptTime = now;
     if (now - firstAttemptTime > LOCKOUT_DURATION) {
