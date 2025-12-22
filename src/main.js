@@ -112,39 +112,7 @@ window.onload = function() {
             alert("Simulated wallet connected: 0xGHOSTWALLET123");
         };
     }
-    // Download Key Button
-    const downloadKeyBtn = document.getElementById("downloadKey");
-    if (downloadKeyBtn) {
-        downloadKeyBtn.onclick = () => {
-            const keyContent = localStorage.getItem("lastPrivateKeyContent");
-            const vaultContent = localStorage.getItem("lastGhostVaultContent"); // ✅ FIX 3: Get JSON content
-
-            if (!keyContent || !vaultContent) { // ✅ Check if both are available
-                alert("No key or vault has been generated yet. Please click 'Create GhostKey' first.");
-                return;
-            }
-            // 1. Re-download PEM Key
-            let keyBlob = new Blob([keyContent], { type: "application/x-pem-file" });
-            let keyURL = URL.createObjectURL(keyBlob);
-            let link = document.createElement("a");
-            link.href = keyURL;
-            link.download = "ghostkey_private.pem";
-            link.click();
-            URL.revokeObjectURL(keyURL); // Clean up temporary URL
-            
-            // 2. Re-download JSON Vault ✅
-            let vaultBlob = new Blob([vaultContent], { type: "application/json" });
-            let vaultURL = URL.createObjectURL(vaultBlob);
-            link = document.createElement("a");
-            link.href = vaultURL;
-            link.download = "ghostvault_custom.json";
-            link.click();
-            URL.revokeObjectURL(vaultURL); // Clean up temporary URL
-
-            document.getElementById("output").textContent = "GhostVault (.json) and Private Key (.pem) re-downloaded successfully.";
-        };
-    }
-    
+   
     // Check files on load logic from Index.html
     const vaultFileInput = document.getElementById("vaultFile");
     const privateKeyInput = document.getElementById("privateKeyFile");
