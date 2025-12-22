@@ -3,7 +3,6 @@
         const burned = localStorage.getItem("burnedInvite");
         if(!burned) {
             generateGhostKey ();
-            generateVault ();
            localStorage.setItem("burnedInvite", true); // <-- CRITICAL TYPO: setItem9
         } else {
             document.body.innerHTML ="This invite has already been used"; 
