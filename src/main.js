@@ -1,13 +1,25 @@
 // main.js
 
-async function generateGhostKey() {
-    // Get pattern from user input
-    const patternInput = document.getElementById("patternInput")?.value;
-    if (!patternInput) {
-        alert("❌ Please enter a pattern first!");
-        return;
+function bufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
     }
+    const base64Content = btoa(binary);
+    return `-----BEGIN PRIVATE KEY-----\n${base64Content.match(/.{1,64}/g).join('\n')}\n-----END PRIVATE KEY-----`;
+}
 
+function u8ToBase64(u8) {
+    let binary = "";
+    const bytes = new Uint8Array(u8);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+async function generateGhostKey() {
     const rsaKeys = await crypto.subtle.generateKey(
         {
             name: "RSA-OAEP",
@@ -46,26 +58,6 @@ async function generateGhostKey() {
         rawAES
     );
     
-    function u8ToBase64(u8) {
-        let binary = "";
-        const bytes = new Uint8Array(u8);
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return btoa(binary);
-    }
-
-    // NEW: Hash the pattern
-    async function hashPattern(pattern) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(pattern);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(hashBuffer))
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('');
-    }
-
-    const pattern_hash = await hashPattern(patternInput);
     let walletAddress = document.getElementById("walletAddress")?.value || "0xGHOSTWALLET123";
 
     const ghostVault = {
@@ -77,13 +69,20 @@ async function generateGhostKey() {
         aes_key_enc: u8ToBase64(encryptedAESKey),
         vault_enc: u8ToBase64(encryptedVault),
         vault_iv: u8ToBase64(iv),
-        pattern_hash: pattern_hash, // NEW: Store pattern hash
+        allowed_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
         ghostfade_at: new Date(Date.now() + 3600 * 1000).toISOString(),
         owner_wallet: walletAddress
     };
 
+    const vaultContent = JSON.stringify(ghostVault, null, 2);
+    const privatePem = bufferToBase64(privateKey);
+
+    // Store in localStorage for re-download
+    localStorage.setItem("lastPrivateKeyContent", privatePem);
+    localStorage.setItem("lastGhostVaultContent", vaultContent);
+
     // Download vault.json
-    const vaultBlob = new Blob([JSON.stringify(ghostVault, null, 2)], { type: "application/json" });
+    const vaultBlob = new Blob([vaultContent], { type: "application/json" });
     const vaultURL = URL.createObjectURL(vaultBlob);
     const vaultLink = document.createElement("a");
     vaultLink.href = vaultURL;
@@ -91,19 +90,8 @@ async function generateGhostKey() {
     vaultLink.click();
     URL.revokeObjectURL(vaultURL);
 
-    // Download private key as .pem
-    function bufferToBase64(buffer) {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        const base64Content = btoa(binary);
-        return `-----BEGIN PRIVATE KEY-----\n${base64Content.match(/.{1,64}/g).join('\n')}\n-----END PRIVATE KEY-----`;
-    }
-
-    const privatePem = bufferToBase64(privateKey);
-    const keyBlob = new Blob([privatePem], { type: "text/plain" });
+    // Download private key .pem
+    const keyBlob = new Blob([privatePem], { type: "application/x-pem-file" });
     const keyURL = URL.createObjectURL(keyBlob);
     const keyLink = document.createElement("a");
     keyLink.href = keyURL;
@@ -124,12 +112,46 @@ window.onload = function() {
     const walletKeyBtn = document.getElementById("walleyKey");
     if (walletKeyBtn) {
         walletKeyBtn.onclick = () => {
-            const mockAddress = "0xGHOSTWALLET" + Math.random().toString(36).substring(7).toUpperCase();
+            const mockAddress = "0xGHOST" + Math.random().toString(36).substring(2, 15).toUpperCase();
             const walletInput = document.getElementById("walletAddress");
             if (walletInput) {
                 walletInput.value = mockAddress;
             }
             alert("✅ Simulated wallet connected: " + mockAddress);
+        };
+    }
+
+    // Download Key Button - RE-DOWNLOADS BOTH FILES
+    const downloadKeyBtn = document.getElementById("downloadKey");
+    if (downloadKeyBtn) {
+        downloadKeyBtn.onclick = () => {
+            const keyContent = localStorage.getItem("lastPrivateKeyContent");
+            const vaultContent = localStorage.getItem("lastGhostVaultContent");
+
+            if (!keyContent || !vaultContent) {
+                alert("❌ No key or vault has been generated yet. Please click 'Create GhostKey' first.");
+                return;
+            }
+
+            // 1. Re-download PEM Key
+            let keyBlob = new Blob([keyContent], { type: "application/x-pem-file" });
+            let keyURL = URL.createObjectURL(keyBlob);
+            let link = document.createElement("a");
+            link.href = keyURL;
+            link.download = "ghostkey_private.pem";
+            link.click();
+            URL.revokeObjectURL(keyURL);
+            
+            // 2. Re-download JSON Vault
+            let vaultBlob = new Blob([vaultContent], { type: "application/json" });
+            let vaultURL = URL.createObjectURL(vaultBlob);
+            link = document.createElement("a");
+            link.href = vaultURL;
+            link.download = "ghostvault_custom.json";
+            link.click();
+            URL.revokeObjectURL(vaultURL);
+
+            document.getElementById("output").textContent = "✅ GhostVault (.json) and Private Key (.pem) re-downloaded successfully.";
         };
     }
 };
