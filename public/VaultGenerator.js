@@ -18,7 +18,7 @@ export async function generateVaultFile(pattern, walletAddress = "", notes = "We
     // Export private key PEM 
     const privateKeyBuffer = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey); 
     const privateKeyBase64 = arrayBufferTobase64(privateKeyBuffer):
-    const privatePem = '-----BEGIN PRIVATE KEY------\n${formatPemKey(privateKeyBase64)}\n----END PRIVATE KEY----';
+    const privatePem = '-----BEGIN PRIVATE KEY----- PRIVATE KEY------\n${formatPemKey(privateKeyBase64)}\n-----END PRIVATE KEY-----';
    
     const publicKeyBuffer = await crypto.subtle.exportKey("spki", keyPair.publicKey);
     const publicKeyBase64 = arrayBufferToBase64(publicKeyBuffer); 
