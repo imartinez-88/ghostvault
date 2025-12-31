@@ -3,6 +3,29 @@ const MAX_ATTEMPTS = 3;
 const LOCKOUT_DURATION = 5 * 60 * 1000;
 let firstAttemptTime = null;
 
+export async function createAESKeyFromPattern(pattern) { 
+    const encoder = new TextEncoder();
+    const patternData = encoder.encode(pattern); 
+    const hashBuffer = await crypto.subtle.digest('SHA-256', patternData);
+
+    return await crupto.subtle.importKey(
+        "raw", 
+        hashBuffer, 
+        { name: "AES-GCM"}, 
+        false, 
+        ["encrypted ", "decrypted"]
+    );
+}
+
+async function hashPattern(pattern) { 
+    const encoder = new TextEncoder(); 
+    const data = encoder.condoe(pattern); 
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Araary.from(new Unit8Arrary(hashBuffer)) 
+        .map (b => b.toString(16).padStart(2, '0'))
+        .join('');
+} 
+
 async function tryUnlockVault(patternInput, vaultData) {
     const now = Date.now();
     if (!firstAttemptTime) firstAttemptTime = now;
@@ -16,6 +39,11 @@ async function tryUnlockVault(patternInput, vaultData) {
     }
   
 const privateKeyText = sessionStorage.getItem("privateKeyContent");
+if (!privateText) {
+    document.getElementById("output").textContent = "Private key not loaded. Upload .pem file"; 
+    return false; 
+}
+    
 const vaultEncBase64 = vaultData.aes_key_enc; // Encrypted AES Key (RSA)
 const ivBase64 = vaultData.vault_iv;
 const encryptedVaultBase64 = vaultData.vault_enc;
@@ -45,13 +73,13 @@ let privateKey;
   
   try {
         const encryptedAESKey = Uint8Array.from(atob(vaultEncBase64), c => c.charCodeAt(0));
-        
-        // 1. Decrypt the raw AES key using the RSA Private Key
-      //  const decryptedAESKey = await crypto.subtle.decrypt(
-    //        { name: "RSA-OAEP" },
-    //        privateKey,
-   //         encryptedAESKey
-  //      );
+
+
+         const decryptedVault = await crypto.subtle.decrypt(
+            { name: "RSA-OAEP" },
+            privateKey,
+            encryptedAESKey
+        );
         
         // 2. Import the decrypted raw AES key
         const aesKey = await crypto.subtle.importKey(
@@ -75,18 +103,20 @@ let privateKey;
         sessionStorage.setItem("decryptedVault", message);
         
         // 4. Pattern Lock Check (Used as a second factor now)
-        if (patternInput !== "2-5-8-7") { 
+        const inputPatternHash = await hashPattern(patternInput);
+        if (patternInput !== vaultData.pattern_hash) { 
             failedAttempts++;
+            document.getElementById("output").textContent = "Incorrect Pattern"; 
             return false;
         }
 
         return true;
      
   } catch (err) {
-        failedAttempts++;
-        document.getElementById("output").textContent = " Decryption Failed. Key/Vault mismatch.";
-        console.error("Decryption Error:", err);
-        return false;
+    failedAttempts++;
+    document.getElementById("output").textContent = " Decryption Failed. Key/Vault mismatch.";
+    console.error("Decryption Error:", err);
+    return false;
     }
 }
 
@@ -123,75 +153,111 @@ export async function handleUnlockClick() {
   const output = document.getElementById("output");
   const enterVaultBtn = document.getElementById("enterVaultBtn");
 
- const vaultText = sessionStorage.getItem("vaultFileContent")
- if (!vaultText) {
-    output.textContent = " Vault data not loaded from session. Return to home page.";
-    return;
-}
-  
-let vaultData;
-  try {
-    vaultData = JSON.parse(vaultText);
-  } catch (e) {
-    output.textContent = " Failed to parse vault data. File corrupted.";
-    return;
-  }
-
-const unlockedSuccessfully = await tryUnlockVault(patternInput, vaultData.vault_enc, vaultData.vault_iv, vaultData);
-  
-  if (!unlockedSuccessfully) {
-        output.textContent = `❌ Decryption/Pattern Failed. Attempts remaining: ${MAX_ATTEMPTS - failedAttempts}`;
-        return;
-    }
-// const biometricPassed = await performBiometricGate();
-  // if (!biometricPassed) {
-    //output.textContent = "Pattern Correct, but Biometric Authentication Failed.";
-    //return;
-  //}
-
-const decryptedMessage = sessionStorage.getItem("decryptedVault"); 
-  if (decryptedMessage) {
-    output.textContent = " Two-Factor Access Granted. Decrypted Vault Message: \n\n" + decryptedMessage;
-  } else {
-    output.textContent = "Two-Factor Access Granted. Click 'Enter Vault Setup' to continue.";
-  }
-  enterVaultBtn.style.display = "inline-block";
-
-  enterVaultBtn.onclick = () => {
-    window.location.href = "vault.html";
-  };
-}
-
-export async function handleRegisterClick() {
-  const publicKey = {
-    challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
-    rp: { name: "GhostVault" },
-    user: {
-      id: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(16))),
-      name: "ghostuser@example.com",
-      displayName: "Ghost User"
-    },
-    pubKeyCredParams: [
-      { type: "public-key", alg: -7 },
-      { type: "public-key", alg: -257 }
-    ],
-    authenticatorSelection: {
-      authenticatorAttachment: "platform",
-      userVerification: "required"
-    },
-    timeout: 60000,
-    attestation: "none"
-  };
-
-  try {
-    const credential = await navigator.credentials.create({ publicKey });
-    if (!credential) {
-      alert("No credential created.");
+  if (!patternInput) { 
+      output.textconent = "Enter a pattern"; 
       return;
+  }
+
+ const vaultText = sessionStorage.getItem("VaultFileContent");
+    if (!vaultText) {
+        output.TextContent = "Vault data not loaded from session. Return to home page."; 
+        return; 
     }
 
-    const rawId = new Uint8Array(credential.rawId);
-    const base64Id = btoa(String.fromCharCode(...rawId));
+    let vaultData; 
+    try { 
+        vaultData = JSON.parse(vaultTest);
+      } catch (e) {
+        output.textConent = "failed to parse vault data. file corrupted."; 
+        return; 
+    } 
+
+const unlockSuccessfully = await tryUnlockVault(patternInput, vaultData): 
+
+if(!unlockSeuccesfully { 
+    output.textContent =' Decryption/Pattern unlcok failed. Attempts remaining: ${MAX_ATTEMPTS - failedAttemtps}';
+    return; 
+} 
+    
+const biometricPassesd = await performBiometricGate(): 
+    if(!biometricPassed) {
+        output.textContent = "Pattern Correct, but Biometric Authentication Failed 
+        return; 
+    } 
+
+const decryptedMessage = seessionStorage.getItem("decryptedVault");
+if(decryptedMessage) {
+    output.textContent = "Two Factor Access Granted. Decrypted Vault Message:" + decryptedMessage; 
+} else { 
+    output.textConent = "Two Factor Access Granted. Click Entern Vault Seutup' to continue. "; 
+} 
+enterVaultBtn.style.display = "inline-block"; 
+
+enterVaultBtn.onclick = () => { 
+    window.location.href = "vault.html"; 
+   }:
+}
+
+export async function handleRegisterClick() { 
+    const publicKey = {
+        challange: window.cyrpto.getRandomValues(new Unit8Arrary(32)),
+        rp: {name:"GhostVault" }, 
+        user: { 
+            id: window.crypto.getRandomValues(new Unit8Arrary(32)),
+            name: "ghostuser@example.com",
+            displayName: "Ghost User" 
+        }, 
+        publicCardParams: [ 
+            {type: "public-key", alg:-7}, 
+            {type: "public-key", alg: -257}
+        ], 
+        authentication: { 
+            authenticationAttachment: "platform",
+            userVerfication: "required"
+        }; 
+    timeout: 60000,
+        attestation:"none"
+}; 
+
+try {
+    const credential = await navigator.credentials.create({ publicKey });
+    if(!credential) { 
+        alert("No Credential Created.");
+        return; 
+    } 
+    const rawId = new Unit8Array(credential.rawId): 
+    const base64Id = btoa (String.fromCharCode(...rawId));
+    localStorage.setItem("ghostCredentialId", base64Id); 
+    alert("Biometric registered successfully."); 
+  } catch (err) {
+    console.error("Registration error:", err);
+    alert("biometric registration failed:" + err.message);
+  }
+} 
+
+export function handleVaultFileUplaod(event) { 
+    const file = event.target.files[0];
+    if (!file) return; 
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        sessionStorage.setItem("vaultFileContent", e.target.result);
+        console.log("Vault file loaded");
+}; 
+    reader.readAsText(file);
+}
+
+export function handlePrivateKeyUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    sessionStorage.setItem("privateKeyContent", e.target.result);
+    console.log("✅ Private key loaded");
+  };
+  reader.readAsText(file);
+}
     localStorage.setItem("ghostCredentialId", base64Id);
     alert("Biometric registered successfully.");
   } catch (err) {
