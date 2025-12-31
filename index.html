@@ -2,20 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GhostVault - Create Keys</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <title>GhostChain</title>
   <style>
-   body {
-      font-family: 'Orbitron', sans-serif;
+    body {
+      font-family: monospace;
       background: #0a0a0a;
-      color: #fff;
-      padding: 40px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    h1, h2 {
-      color: #44cc88;
+      color: #00fff2;
+      padding: 2rem;
     }
     button {
       background: #44cc88;
@@ -23,94 +16,96 @@
       border: none;
       padding: 12px 24px;
       margin: 8px 4px;
-      border-radius: 8px;
       cursor: pointer;
-      font-family: 'Orbitron', sans-serif;
       font-size: 14px;
-      transition: background 0.3s;
     }
-    button:hover {
-      background: #66ffaa;
-     
-    }
-    input, textarea {
-      width: 100%;
+    input {
+      width: 300px;
       padding: 10px;
       margin: 8px 0;
       background: #1a1a1a;
       border: 1px solid #44cc88;
       color: #fff;
-      border-radius: 4px;
-      font-family: 'Orbitron', sans-serif;
     }
-    label {
-      display: block;
-      margin-top: 16px;
-      color: #44cc88;
-    }
-     #output {
-      background: #1a1a1a;
-      padding: 16px;
-      border-radius: 8px;
-      margin-top: 20px;
-      border: 1px solid #44cc88;
+  </style>
+</head>
+<body>
+  <h1>GhostKey Access System</h1>
 
-   </style>
- </head>
- <body>
-   <h1>GhostKey Access System</h1>
+  <!-- NEW: Pattern Input -->
+  <label>Pattern (e.g., 2-5-8-7):</label><br>
+  <input type="text" id="patternInput" placeholder="Enter pattern"><br><br>
 
-  <section>
-    <h2>Step 1: Generate Your Keys</h2>
-    <button id="downloadKeyBtn">Download Key</button>
-    <p style="color: #888; font-size: 12px;">↑ Click this first to generate and download your private key (.pem)</p>
-  </section>
+  <label>Wallet Address (optional):</label><br>
+  <input type="text" id="walletAddress" placeholder="0x..." readonly><br><br>
 
-    <section>
-    <h2>Step 2: Create Your Vault</h2>
-     
-    <label>Pattern (e.g., 2-5-8-7):</label>
-    <input type="text" id="patternInput" placeholder="Enter your unlock pattern">
+  <!-- Key Management -->
+  <button id="createKey" onclick="window.generateGhostKey()">Create GhostKey (Encrypted)</button>
+  <button id="walleyKey">Connect Wallet to Create GhostKey</button>
 
-    <label>Wallet Address (optional):</label>
-    <input type="text" id="walletAddress" placeholder="0x..." readonly>
-    <button id="connectWalletBtn">Connect Wallet</button>
-
-    <label>Vault Notes:</label>
-    <textarea id="vaultNotes" rows="4" placeholder="Enter notes to encrypt in your vault...">Welcome to your encrypted GhostVault</textarea>
-    
-    <button id="createVaultBtn">Create GhostKey (Encrypted)</button>
-  </section>
-
-    
- <h2>Recover GhostVault (Private Key)</h2>
-  <section>
-    <label>Vault File (.json):</label>
-    <input type="file" id="vaultFile" accept=".json">
-    
-    <label>Private Key File (.pem):</label>
-    <input type="file" id="privateKeyFile" accept=".pem">
-    
-    <button id="goToUnlockBtn">Enter Biometric + Pattern Access</button>
-  </section>
+  <h2>Recover GhostVault (Private Key)</h2>
+  <label>Vault File (.json):</label><br>
+  <input type="file" id="vaultFile"><br><br>
+  <label>Private Key File (.pem):</label><br>
+  <input type="file" id="privateKeyFile"><br><br>
+  <button id="goToVaultBtn" disabled>Enter Biometric + Pattern Access</button>
 
   <pre id="output"></pre>
-  
+    
   <script type="module" src="/src/main.js"></script>
   
-  <script type="module">
-    // Redirect to unlock page when files are uploaded
-    document.getElementById("goToUnlockBtn").onclick = () => {
-      const vaultFile = document.getElementById("vaultFile").files[0];
-      const keyFile = document.getElementById("privateKeyFile").files[0];
-      
-      if (!vaultFile || !keyFile) {
-        alert("❌ Please upload both vault and private key files first!");
-        return;
+  <script>
+    const vaultFileInput = document.getElementById("vaultFile");
+    const privateKeyInput = document.getElementById("privateKeyFile");
+    const goBtn = document.getElementById("goToVaultBtn");
+  
+    function checkFiles() {
+      const vaultFileValid = vaultFileInput.files.length && vaultFileInput.files[0].name.endsWith('.json');
+      const keyFileValid = privateKeyInput.files.length && privateKeyInput.files[0].name.endsWith('.pem');
+
+      goBtn.disabled = !(vaultFileValid && keyFileValid);
+
+      const output = document.getElementById("output");
+      if (!goBtn.disabled) {
+        output.textContent = "✅ Files ready. Click 'Gain Vault Access'.";
+      } else if ((vaultFileInput.files.length && !vaultFileValid) || (privateKeyInput.files.length && !keyFileValid)) {
+        output.textContent = "❌ Please ensure the Vault File is .json and the Private Key File is .pem.";
+      } else {
+        output.textContent = "";
       }
-      
-      // Redirect to unlock page
-      window.location.href = "unlock.html";
+    }
+     
+    vaultFileInput.addEventListener("change", checkFiles);
+    privateKeyInput.addEventListener("change", checkFiles);
+
+    goBtn.onclick = () => {
+        const vaultFile = vaultFileInput.files[0];
+        const keyFile = privateKeyInput.files[0];
+
+        if (vaultFile && keyFile) {
+            const vaultReader = new FileReader();
+            const keyReader = new FileReader(); 
+     
+            vaultReader.onload = (e) => {
+                sessionStorage.setItem("vaultFileContent", e.target.result);
+                checkAndRedirect();
+            };
+            vaultReader.readAsText(vaultFile);
+ 
+            keyReader.onload = (e) => {
+                sessionStorage.setItem("privateKeyContent", e.target.result);
+                checkAndRedirect();
+            };
+            keyReader.readAsText(keyFile);
+ 
+            function checkAndRedirect() {
+                if (sessionStorage.getItem("vaultFileContent") && sessionStorage.getItem("privateKeyContent")) {
+                    window.location.href = "unlock.html";
+                }
+            }
+        } else {
+            alert("Please select both the Vault File (.json) and Private Key (.pem).");
+        }
     };
   </script>
 </body>
