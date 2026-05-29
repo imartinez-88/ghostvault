@@ -40,6 +40,3 @@ It simulates key components of a modern **zero-trust vault**, implementing crypt
 * Replace simulated wallet checks with a clear mock-up function, or integrate a simple library (like Ethers.js) for true read-only connection.
 
 > 🔒 **Disclaimer:** This project is for demonstration/educational purposes only and is not licensed for use in production environments.
-> git add README.md
-git commit -m "Refine repository description and access notes"
-git push
